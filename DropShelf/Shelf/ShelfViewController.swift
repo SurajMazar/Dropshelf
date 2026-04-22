@@ -149,8 +149,23 @@ final class DockedTabView: NSView {
         badgeLabel.frame = badgeBg.frame
     }
 
-    override func mouseUp(with event: NSEvent) { onClick?() }
     override var mouseDownCanMoveWindow: Bool { false }
+
+    private var didDrag = false
+
+    override func mouseDown(with event: NSEvent) {
+        didDrag = false
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        didDrag = true
+        window?.performDrag(with: event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        if !didDrag { onClick?() }
+        didDrag = false
+    }
 }
 
 final class ShelfViewController: NSViewController, NSCollectionViewDataSource, NSCollectionViewDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate, ShelfItemCellDelegate, NSSearchFieldDelegate {
@@ -316,8 +331,8 @@ final class ShelfViewController: NSViewController, NSCollectionViewDataSource, N
 
     private func updateDockButtonIcon() {
         let docked = !dockedView.isHidden
-        let name = docked ? "sidebar.right" : "sidebar.squares.right"
-        dockButton?.image = NSImage(systemSymbolName: name, accessibilityDescription: docked ? "Undock" : "Dock to edge")
+        let name = docked ? "arrow.up.left.and.arrow.down.right" : "arrow.down.right.and.arrow.up.left"
+        dockButton?.image = NSImage(systemSymbolName: name, accessibilityDescription: docked ? "Expand" : "Collapse")
     }
 
     private func buildHeader(containerWidth: CGFloat) -> NSView {
@@ -339,7 +354,7 @@ final class ShelfViewController: NSViewController, NSCollectionViewDataSource, N
         let spacing: CGFloat = 2
         let symbols: [(symbol: String, action: Selector, tip: String, tint: NSColor)] = [
             ("magnifyingglass", #selector(toggleSearch), "Search (⌘F)", .systemOrange),
-            ("sidebar.squares.right", #selector(toggleDock), "Dock to edge", .systemPurple),
+            ("arrow.down.right.and.arrow.up.left", #selector(toggleDock), "Collapse", .systemPurple),
             ("arrow.up.forward.app", #selector(revealAll), "Reveal in Finder", .systemBlue),
             ("trash", #selector(clearAll), "Clear all", .systemRed),
             ("xmark", #selector(hideShelf), "Close shelf", .secondaryLabelColor),
