@@ -125,6 +125,15 @@ final class ShelfWindowController: NSWindowController {
         isDocked ? undock() : dock()
     }
 
+    func shakeToggle() {
+        guard let window else { return }
+        if window.isVisible && !isDocked {
+            dock()
+        } else {
+            show(nearCursor: true)
+        }
+    }
+
     private func dock() {
         guard let window, !isDocked, !isAnimating else { return }
         let screen = window.screen ?? NSScreen.main ?? NSScreen.screens.first!

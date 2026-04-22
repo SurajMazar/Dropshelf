@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         shakeDetector = ShakeDetector { [weak self] in
-            self?.windowController.show(nearCursor: true)
+            self?.windowController.shakeToggle()
         }
         shakeDetector.start()
 
