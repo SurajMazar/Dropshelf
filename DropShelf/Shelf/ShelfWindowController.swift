@@ -51,7 +51,7 @@ final class ShelfWindowController: NSWindowController {
         guard let screen = window.screen ?? NSScreen.main else { return }
         let rightGap = screen.visibleFrame.maxX - window.frame.maxX
         if rightGap < 28 {
-            dock(atEdge: true)
+            dock()
         }
     }
 
@@ -122,47 +122,30 @@ final class ShelfWindowController: NSWindowController {
     }
 
     func toggleDock() {
-        isDocked ? undock() : collapseInPlace()
+        isDocked ? undock() : dock()
     }
 
     func shakeToggle() {
         guard let window else { return }
         if window.isVisible && !isDocked {
-            collapseInPlace()
+            dock()
         } else {
             show(nearCursor: true)
         }
     }
 
-    private func collapseInPlace() {
-        dock(atEdge: false)
-    }
-
-    private func dock(atEdge: Bool) {
+    private func dock() {
         guard let window, !isDocked, !isAnimating else { return }
         let screen = window.screen ?? NSScreen.main ?? NSScreen.screens.first!
         preDockFrame = window.frame
 
         let visible = screen.visibleFrame
-        let size = Self.dockedSize
-        let target: NSRect
-        if atEdge {
-            target = NSRect(
-                x: visible.maxX - size.width,
-                y: visible.midY - size.height / 2,
-                width: size.width,
-                height: size.height
-            )
-        } else {
-            let currentCenter = NSPoint(x: window.frame.midX, y: window.frame.midY)
-            var origin = NSPoint(
-                x: currentCenter.x - size.width / 2,
-                y: currentCenter.y - size.height / 2
-            )
-            origin.x = max(visible.minX + 4, min(origin.x, visible.maxX - size.width - 4))
-            origin.y = max(visible.minY + 4, min(origin.y, visible.maxY - size.height - 4))
-            target = NSRect(origin: origin, size: size)
-        }
+        let target = NSRect(
+            x: visible.maxX - Self.dockedSize.width,
+            y: visible.midY - Self.dockedSize.height / 2,
+            width: Self.dockedSize.width,
+            height: Self.dockedSize.height
+        )
 
         isDocked = true
         viewController.setDocked(true)
